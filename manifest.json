@@ -1,0 +1,39 @@
+
+{
+  "manifest_version": 2,
+  "name": "FindMarkCopy",
+  "description": "speed to find then mark then copy word",
+  "version": "5.0",
+
+  "browser_action": {
+    "default_icon": "logo.png",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+        "16": "logo.png",
+        "48": "logo.png",
+        "128": "logo.png"
+    },
+  "content_scripts":[
+  	{
+  	"matches":["http://*/*","https://*/*"],
+  	"js":["content.js"]
+	}
+  ],
+  "background":{
+  	"scripts":[
+  		"background.js"
+  	]
+  }
+  ,
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "https://ajax.googleapis.com/",
+    "<all_urls>"
+  ],
+  "web_accessible_resources":[
+    "*.png",
+    "*.gif"
+  ]
+}
