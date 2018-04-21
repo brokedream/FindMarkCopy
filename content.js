@@ -72,6 +72,18 @@ function ClearColor(){
 	currentChangedDom=[]
 	return 
 }
+
+let count=0
+
+SearchText.prototype.littleSearch=function(node){
+	if(node.nextSibling!==null){
+	if(node.nextSibling.textContent.match(/\w+/)){return node.textContent+node.nextSibling.textContent}
+
+		return node.textContent+(node.nextSibling!==null?this.littleSearch(node.nextSibling):"")
+	}
+
+	return ""
+}
 SearchText.prototype.dfs=function(tree){
 
 
@@ -91,49 +103,127 @@ SearchText.prototype.dfs=function(tree){
 						let language=""
 						let testEnglish=new RegExp(/^\w+$/)
 						let testPhp=new RegExp(/^\\\$.+/)
-						let testProgramCommon=new RegExp(/\w+\.?\w+/)
-						let protectParenthesis= new RegExp(/(\(|\)|\*|\+|\$)/g)
+						let testArrow=new RegExp(/\w+->\w+/)
+						let testC=new RegExp(/\w+::\w+/)
+						let testSpecial=new  RegExp(/^(\\\*|\&)/)
+						let testCommonProgramLanguage=new RegExp(/\w+\.\w/)
+						let protectParenthesis= new RegExp(/(\(|\)|\*|\+|\$|\[|\])/g)
 						afterParenthesisProtect=this.text.replace(protectParenthesis,"\\$1")
 						if(testEnglish.test(afterParenthesisProtect)){
+							 language="english"
 							 re=new RegExp("\\b"+afterParenthesisProtect+"\\b","gi")
 
-						}else if(testPhp.test(afterParenthesisProtect)&&afterParenthesisProtect.match(/\$this/)){
-							 re=new RegExp(afterParenthesisProtect,"gi")
-							 language="php"
+						}else if(testCommonProgramLanguage.test(afterParenthesisProtect)){
 
-						}
-						else if(testProgramCommon.test(afterParenthesisProtect)){
 							 re=new RegExp(afterParenthesisProtect,"gi")
 							 language="common"
 						}
+						else if(testPhp.test(afterParenthesisProtect)&&afterParenthesisProtect.match(/\$\w+/)){
+
+							 re=new RegExp(afterParenthesisProtect,"gi")
+							 language="php"
+						}else if(testC.test(afterParenthesisProtect)){
+							 re=new RegExp(afterParenthesisProtect,"gi")
+							 language="c"
+						}
 						else{
+
 							 re=new RegExp(afterParenthesisProtect,"gi")
 						}
 
+						if(language=="english"&&tree.textContent.match(re) ){
+							console.log("en")
 
-						if(language!=="php"&&&language!=="common"&&tree.textContent.match(re) ){
 							if(tree.parentNode!==DomClicked){
 								tree.textContent=tree.textContent.replace(re,"❤ "+word)
 							}
 						
 							currentChangedDom.push(tree)
-						}else if(language=="php" &&tree.parentNode.nextSibling!=null ){
+						}else if(language=="common"&&tree.textContent.match(this.text.split('.')[0])&&tree.textContent.length>=1){
+							console.log("common")
 
-							if(tree.parentNode.nextSibling.nextSibling!=null){
-								if((tree.textContent+tree.parentNode.nextSibling.textContent+tree.parentNode.nextSibling.nextSibling.textContent).match(re) && tree.parentNode!=DomClicked){
+							if(tree.parentNode.nextSibling!==undefined){
+								if(this.littleSearch(tree.parentNode).match(re)){
+								tree.textContent=tree.textContent.replace(this.text.split('.')[0],"❤ "+this.text.split('.')[0])
+								currentChangedDom.push(tree)
+								console.log(currentChangedDom)
 
-
-
-							if(tree.parentNode!==DomClicked){
-									tree.textContent=tree.textContent.replace("$this","❤ $this")
+								}
 							}
+						}
+						else if(language=="php" &&tree.textContent==this.text.slice(0,tree.textContent.length)&&tree.textContent.length>=1){
+							console.log("php")
 
+								// console.log(this.text.split("->"))
+								if(this.text.length==tree.textContent.length){
+									console.log("sd")
+									tree.textContent=tree.textContent.replace(tree.textContent,"❤ "+tree.textContent)
+									currentChangedDom.push(tree)
+								}else{
+									// if(tree.parentNode.parentNode.textContent.trim().slice(0,this.text.length)==this.text){
+									if(tree.parentNode.parentNode.textContent.trim().match(re)){
+									tree.textContent=tree.textContent.replace(tree.textContent,"❤ "+tree.textContent)
 									currentChangedDom.push(tree)
 									}
+								}
+
+							// if(this.text.length>=tree.textContent.length){
+
+							// }else{
+
+							}else if(language=="c"&&tree.textContent==this.text.slice(0,tree.textContent.length)&&tree.textContent.length>=1){
+
+								if(this.littleSearch(tree.parentNode).match(re)){
+								tree.textContent=tree.textContent.replace(this.text.split('::')[0],"❤ "+tree.textContent)
+								currentChangedDom.push(tree)
+								}
+
+
+							}
+							else if(tree.textContent.match(re) ){
+							console.log("toher")
+
+							if(tree.parentNode!==DomClicked){
+								tree.textContent=tree.textContent.replace(re,"❤ "+word)
+							}
+						
+							currentChangedDom.push(tree)
 							}
 
+							// if(this.github_judgeNextSibling_recursive(tree).match(re)){
+							// 	tree.textContent=tree.textContent.replace("$this","❤ $this")
 
-						}
+							// }
+
+
+
+						// else if(language=="php" &&tree.parentNode.nextSibling!=null ){
+
+						// 	if(tree.parentNode.nextSibling.nextSibling!=null){
+						// 		if((tree.textContent+tree.parentNode.nextSibling.textContent+tree.parentNode.nextSibling.nextSibling.textContent).match(re) && tree.parentNode!=DomClicked){
+
+
+
+						// 	if(tree.parentNode!==DomClicked){
+						// 			tree.textContent=tree.textContent.replace("$this","❤ $this")
+						// 	}
+
+						// 			currentChangedDom.push(tree)
+						// 			}
+						// 	}
+
+
+						// }
+
+
+
+
+
+
+
+
+
+
 						// 處理 $xx->xx->ffhdr 和xxx.fff
 						// else  if(language=="common" &&tree.parentNode.nextSibling!=null ){
 
@@ -175,6 +265,7 @@ SearchText.prototype.dfs=function(tree){
 
 
 }	
+
 function createSearchDom(){
 	let searchDiv= document.createElement("DIV")
 	let WrapTextImg= document.createElement("DIV")

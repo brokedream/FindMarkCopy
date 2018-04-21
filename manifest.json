@@ -3,7 +3,7 @@
   "manifest_version": 2,
   "name": "FindMarkCopy",
   "description": "speed to find then mark then copy word",
-  "version": "5.0",
+  "version": "6.0",
 
   "browser_action": {
     "default_icon": "logo.png",
