@@ -1,16 +1,22 @@
 window.onload=function(){	
 
-
 	let currentChangedDom=[]
 	let word=""
 	let DomClicked=""
+	let currentViewNode
+	let currentViewNodeIndex=1
 
+document.onkeyup = function(e) {
+  if (e.which == 192&&e.ctrlKey ) {
+  chrome.runtime.sendMessage({type:"changeToggle"},function(res){
+  } )
+}}
 document.getElementsByTagName("body")[0].addEventListener("mouseup",(e)=>{
 DomClicked=e.target
 	chrome.runtime.sendMessage({type:"toggle"},function(res){
 		if(res.toggle=="true"){
-	if(e.which==1){
-
+	if(e.which==1&&DomClicked.id!="targetFind"){
+currentViewNodeIndex=1
 
 
 		word=window.getSelection().toString().trim()
@@ -43,6 +49,7 @@ DomClicked=e.target
 				// }
 
 				createSearchDom()
+
 			}
 
 	}
@@ -132,7 +139,6 @@ SearchText.prototype.dfs=function(tree){
 						}
 
 						if(language=="english"&&tree.textContent.match(re) ){
-							console.log("en")
 
 							if(tree.parentNode!==DomClicked){
 								tree.textContent=tree.textContent.replace(re,"❤ "+word)
@@ -140,23 +146,19 @@ SearchText.prototype.dfs=function(tree){
 						
 							currentChangedDom.push(tree)
 						}else if(language=="common"&&tree.textContent.match(this.text.split('.')[0])&&tree.textContent.length>=1){
-							console.log("common")
 
 							if(tree.parentNode.nextSibling!==undefined){
 								if(this.littleSearch(tree.parentNode).match(re)){
 								tree.textContent=tree.textContent.replace(this.text.split('.')[0],"❤ "+this.text.split('.')[0])
 								currentChangedDom.push(tree)
-								console.log(currentChangedDom)
 
 								}
 							}
 						}
 						else if(language=="php" &&tree.textContent==this.text.slice(0,tree.textContent.length)&&tree.textContent.length>=1){
-							console.log("php")
 
 								// console.log(this.text.split("->"))
 								if(this.text.length==tree.textContent.length){
-									console.log("sd")
 									tree.textContent=tree.textContent.replace(tree.textContent,"❤ "+tree.textContent)
 									currentChangedDom.push(tree)
 								}else{
@@ -164,6 +166,7 @@ SearchText.prototype.dfs=function(tree){
 									if(tree.parentNode.parentNode.textContent.trim().match(re)){
 									tree.textContent=tree.textContent.replace(tree.textContent,"❤ "+tree.textContent)
 									currentChangedDom.push(tree)
+
 									}
 								}
 
@@ -181,7 +184,6 @@ SearchText.prototype.dfs=function(tree){
 
 							}
 							else if(tree.textContent.match(re) ){
-							console.log("toher")
 
 							if(tree.parentNode!==DomClicked){
 								tree.textContent=tree.textContent.replace(re,"❤ "+word)
@@ -189,6 +191,8 @@ SearchText.prototype.dfs=function(tree){
 						
 							currentChangedDom.push(tree)
 							}
+
+
 
 							// if(this.github_judgeNextSibling_recursive(tree).match(re)){
 							// 	tree.textContent=tree.textContent.replace("$this","❤ $this")
@@ -274,31 +278,46 @@ function createSearchDom(){
 	let Searchlink= document.createElement("A")
 	let searchImg= document.createElement("IMG")
 	let Searchtext=document.createTextNode("Total:"+currentChangedDom.length)
-
+	let targetFind
 	searchDiv.style.position="fixed"
 	searchDiv.style.top=window.innerHeight/2+"px"
 	searchDiv.id="FMCdiv"
 	searchImg.src=chrome.extension.getURL("searchButton2.gif")
 	WrapTextImg.appendChild(searchImg)
 	TextDiv.appendChild(Searchtext)
-	WrapTextImg.appendChild(TextDiv)
 	TextDiv.style.backgroundColor="#5FBA7D"
 	TextDiv.style.color="#E6FFEA"
 	TextDiv.style.padding="3px";
     TextDiv.style.borderRadius="11px";
     TextDiv.style.fontSize= "6px";
+    targetFind=TextDiv.cloneNode(true)
+    targetFind.id="targetFind"
+    targetFind.childNodes[0].textContent=currentViewNodeIndex+"/"+currentChangedDom.length
+    targetFind.addEventListener("mousedown",()=>{
+    	currentViewNodeIndex++
+    	if(currentViewNodeIndex>currentChangedDom.length){
+    		currentViewNodeIndex=1
+targetFind.childNodes[0].textContent=currentViewNodeIndex+"/"+currentChangedDom.length
+
+    	currentChangedDom[currentViewNodeIndex-1].parentNode.scrollIntoView()
+
+    	}else{
+    		targetFind.childNodes[0].textContent=currentViewNodeIndex+"/"+currentChangedDom.length
+    	currentChangedDom[currentViewNodeIndex-1].parentNode.scrollIntoView()
+    	}
+
+})
 
 	Searchlink.innerHTML=WrapTextImg.outerHTML
 	Searchlink.setAttribute('href',`https://www.google.com.tw/search?q=${word}`)
 	Searchlink.setAttribute('target',"_blank")
 	Searchlink.style.textDecoration="none"
-
 	searchDiv.appendChild(Searchlink)
+	searchDiv.appendChild(targetFind)
 	searchDiv.style.zIndex=10000
 	document.body.appendChild(searchDiv)
+
 }
-
-
 
 }
 
