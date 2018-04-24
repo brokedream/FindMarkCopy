@@ -1,18 +1,76 @@
 window.onload=function(){	
-
+	let documentCopy=document
 	let currentChangedDom=[]
 	let word=""
 	let DomClicked=""
 	let currentViewNode
 	let currentViewNodeIndex=1
+	let unlockCopy=false
+  const directCopyEvents = ['copy', 'cut', 'contextmenu', 'selectstart']
+document.body.style.userSelect ="auto"
 
 document.onkeyup = function(e) {
   if (e.which == 192&&e.ctrlKey ) {
   chrome.runtime.sendMessage({type:"changeToggle"},function(res){
   } )
 }}
+directCopyEvents.forEach(evt=>{
+document.documentElement.addEventListener(evt, function (e) { // Not compatible with IE < 9
+	e.stopImmediatePropagation()
+}, true);
+})
+
+
 document.getElementsByTagName("body")[0].addEventListener("mouseup",(e)=>{
+
 DomClicked=e.target
+
+let url=document.URL
+let reurl
+let UrlparentNode=window.getSelection().getRangeAt(0).endContainer.parentNode
+
+reurl=url.match(/(facebook|twitter|medium|codepen|jsfiddle|messenger)/)
+if(reurl!=null){
+switch(reurl[0]){
+	case "facebook":
+		if(UrlparentNode.dataset.text!==undefined){
+			return
+		}
+	break;
+	case "messenger":
+			return
+	break;
+	case "medium":
+		if(UrlparentNode.classList.contains("is-selected")){
+			return
+		}
+	break;	
+	case "twitter":
+		if(UrlparentNode.parentNode.classList.contains("tweet-box")){
+			return
+		}
+	break;
+	case "jsfiddle":
+			return
+	break;
+	case "codepen":
+			return
+	break;
+	case "codepen":
+			return
+	break;
+
+	default:
+	break;
+
+}	
+}
+
+
+
+if(DomClicked.nodeName.match(/(TEXT|INPUT)/)){
+	return
+}
 	chrome.runtime.sendMessage({type:"toggle"},function(res){
 		if(res.toggle=="true"){
 	if(e.which==1&&DomClicked.id!="targetFind"){
@@ -20,7 +78,7 @@ currentViewNodeIndex=1
 
 
 		word=window.getSelection().toString().trim()
-	if(document.getElementById("FMCdiv")!=null ){
+	if(document.getElementById("FMCdiv")!==null ){
 
 		document.getElementById("FMCdiv").remove()
 
@@ -91,8 +149,24 @@ SearchText.prototype.littleSearch=function(node){
 
 	return ""
 }
-SearchText.prototype.dfs=function(tree){
+SearchText.prototype.unlockCopy=function(tree){
+	console.log( tree["oncontextmenu"])
 
+	console.log(tree)
+	if(tree.childNodes.length>0){
+		for(let i=0;i<tree.childNodes.length;i++){
+
+				this.unlockCopy(tree.childNodes[i])
+
+		}
+
+	}else{
+
+		return
+	}
+}
+
+SearchText.prototype.dfs=function(tree){
 
 	if(tree.childNodes.length>0){
 		for(let i=0;i<tree.childNodes.length;i++){
